@@ -123,7 +123,7 @@ def add_everyone_temp(ctx):
     
     for i in data_temp:
         if i['channel_id'] == ctx.channel.id:
-            i['Meeting']['members_invited'] = members_list_id
+            i['Meeting']['members_invited'] = members_list_id.copy()
 
 
 '''
@@ -131,7 +131,7 @@ Adds the mentioned members to the meeting
 '''
 def add_members_temp(ctx):
     members_list = ctx.message.mentions
-    members_list.append(ctx.message.author)
+    members_list.append(ctx.message.author.id)
     
     members_list_id = []
     for i in members_list:
@@ -140,7 +140,7 @@ def add_members_temp(ctx):
         
     for i in data_temp:
         if i['channel_id'] == ctx.channel.id:
-            i['Meeting']['members_invited'] = members_list_id
+            i['Meeting']['members_invited'] = members_list_id.copy()
 
 '''
 Adds the meeting to a temp
@@ -214,7 +214,7 @@ def check_valid_datetime(channel_id):
     meeting_temp = temp_values_remaining(channel_id)
     time = meeting_temp['time']
     date = meeting_temp['date']
-    if ":" in date:
+    if "/" in date:
         datetime_obj = datetime.strptime(date + " " + time, "%d/%m/%Y %H:%M")
     
     elif "-" in date:
@@ -223,7 +223,11 @@ def check_valid_datetime(channel_id):
     else:
         datetime_obj = datetime.strptime(date + " " + time, "%d.%m.%Y %H:%M")
     
-    current_time = datetime.now()
+    current_time = datetime.utcnow()
+
+    print(current_time)
+    print(datetime_obj)
+    print((current_time-datetime_obj).total_seconds()/60)
 
     if current_time >= datetime_obj :
         return False

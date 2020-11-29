@@ -7,10 +7,6 @@ client = commands.Bot(command_prefix = '.')
 
 '''
 
-Things to work on -
-1. Tell the user if they have not passed any argument
-2. Date and time can be in past
-
 '''
 
 @client.event
@@ -27,16 +23,16 @@ command - reminder
 Used to change the time(in minutes) before which everyone should receive an invite
 '''
 @client.command()
-async def reminder(ctx, reminder):
+async def reminder(ctx, *reminder):
     status = data.check_temp_meeting(ctx.channel.id)
     if not status:
         await ctx.send("No meeting in queue. Start a meeting then add offset")
         return
-    if not data.check_valid_reminder(reminder):
+    if not data.check_valid_reminder(" ".join(reminder)):
         await ctx.send("Wrong format! - 1-99")
         return
     else:
-        data.add_reminder_temp(ctx, reminder)
+        data.add_reminder_temp(ctx, " ".join(reminder))
 
     check = data.check_allvalues_temp(ctx)
     if check == 2:
@@ -47,16 +43,16 @@ command - offset
 Used to change the timezone (in +/- HH:MM) wrt UTC
 '''
 @client.command()
-async def offset(ctx, offset_val):
+async def offset(ctx, *offset_val):
     status = data.check_temp_meeting(ctx.channel.id)
     if not status:
         await ctx.send("No meeting in queue. Start a meeting then add offset")
         return
-    if not data.check_valid_offset(offset_val):
+    if not data.check_valid_offset(" ".join(offset_val)):
         await ctx.send("Wrong format - +HH:MM or -HH:MM")
         return
     else:
-        data.add_offset_temp(ctx, offset_val)
+        data.add_offset_temp(ctx, " ".join(offset_val))
 
     check = data.check_allvalues_temp(ctx)
     if check == 2:
@@ -110,8 +106,8 @@ command - time
 Used to add a time to the meeting
 '''
 @client.command()
-async def time(ctx, time_val):
-    if not data.check_valid_time(time_val):
+async def time(ctx, *time_val):
+    if not data.check_valid_time(" ".join(time_val)):
         await ctx.send("Valid format - HH:MM")
         return
     
@@ -120,7 +116,7 @@ async def time(ctx, time_val):
         await ctx.send("No meeting in queue. Start a meeting then add time")
         return
     else:
-        data.add_time_temp(ctx, time_val)
+        data.add_time_temp(ctx, " ".join(time_val))
         await ctx.send("Time has been added")
     
     check = data.check_allvalues_temp(ctx)
@@ -134,15 +130,15 @@ command - date
 Used to add a date to the meeting
 '''
 @client.command()
-async def date(ctx, date_val):
-    if not data.check_valid_date(date_val):
+async def date(ctx, *date_val):
+    if not data.check_valid_date(" ".join(date_val)):
         await ctx.send("Valid format - DD/MM/YYYY or DD.MM.YYYY or DD-MM-YYYY ")
         return
     status = data.check_temp_meeting(ctx.channel.id)
     if not status:
         await ctx.send("No meeting in queue. Start a meeting then add time")
     else:
-        data.add_date_temp(ctx, date_val)
+        data.add_date_temp(ctx, " ".join(date_val))
         await ctx.send("Date has been added")
     check = data.check_allvalues_temp(ctx)
     if check == 1:
@@ -167,6 +163,9 @@ async def confirm(ctx):
         return
     else:
         #data.add_data_server(ctx.channel.id)
+        #Check for correct date time.
+        isValidDateTime = data.check_valid_datetime(ctx.channel.id)
+        print(isValidDateTime)
         await ctx.send(data.temp_values_remaining(ctx.channel.id))
         await ctx.send("Meeting has been added to the database")
 
