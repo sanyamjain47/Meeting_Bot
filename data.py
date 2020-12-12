@@ -115,6 +115,7 @@ Adds everyone to the meeting
 def add_everyone_temp(ctx):
 
     members_list = ctx.channel.members
+    members_list.append(ctx.message.author)
     members_list_id = []
 
     for i in members_list:
@@ -131,7 +132,7 @@ Adds the mentioned members to the meeting
 '''
 def add_members_temp(ctx):
     members_list = ctx.message.mentions
-    members_list.append(ctx.message.author.id)
+    members_list.append(ctx.message.author)
     
     members_list_id = []
     for i in members_list:
@@ -225,11 +226,9 @@ def check_valid_datetime(channel_id):
     
     current_time = datetime.utcnow()
 
-    print(current_time)
-    print(datetime_obj)
-    print((current_time-datetime_obj).total_seconds()/60)
+    time_difference = (current_time-datetime_obj).total_seconds()/60
 
-    if current_time >= datetime_obj :
+    if time_difference < int(meeting_temp['reminder']) :
         return False
     else:
         return True
@@ -269,8 +268,11 @@ def check_allvalues_temp(ctx):
     else:
         return 2
 
-def checking_client(client, channel_id):
+async def checking_client(client, channel_id):
     print(type(client.get_channel(channel_id)))
-
+    for i in data_temp:
+        for member in i['Meeting']['members_invited']:
+            #print(client.get_user(member))
+            await client.get_user(member).send("CHeck")
+            
 #async def remind_meeting(data_dict):
-    

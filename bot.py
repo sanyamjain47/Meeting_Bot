@@ -165,9 +165,11 @@ async def confirm(ctx):
         #data.add_data_server(ctx.channel.id)
         #Check for correct date time.
         isValidDateTime = data.check_valid_datetime(ctx.channel.id)
-        print(isValidDateTime)
-        await ctx.send(data.temp_values_remaining(ctx.channel.id))
-        await ctx.send("Meeting has been added to the database")
+        if isValidDateTime is True:
+            await ctx.send(data.temp_values_remaining(ctx.channel.id))
+            await ctx.send("Meeting has been added to the database")
+        else:
+            await ctx.send("The time is in past. Please update it.")
 
 '''
 command - clear
@@ -206,7 +208,7 @@ async def remind(ctx):
         await ctx.send("All values have been entered, use confirm to add the meeting")
 
 '''
-command - help
+command - helper
 Used to display all the commands that are needed to add a meeting
 '''
 @client.command()
@@ -221,4 +223,7 @@ async def helper(ctx):
     await ctx.send("7. Use .remind [@Member(s) / @everyone] to add members to the meeting")
     await ctx.send("8. Use .confirm to add the meeting")
 
+@client.command()
+async def start(ctx):
+    await data.checking_client(client,ctx.channel.id)
 client.run('NzE1MzA2NzkwMDE0NjgxMjAx.XtFmEQ.fSEPJ2Jv2BgTMRf7ay3ZIQry-ZQ')
