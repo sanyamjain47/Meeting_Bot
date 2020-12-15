@@ -2,7 +2,7 @@ import sys
 import discord
 from discord.ext import commands
 import data
-
+from discord_key import bot_key
 client = commands.Bot(command_prefix = '.')
 
 '''
@@ -226,4 +226,4 @@ async def helper(ctx):
 @client.command()
 async def start(ctx):
     await data.checking_client(client,ctx.channel.id)
-client.run('NzE1MzA2NzkwMDE0NjgxMjAx.XtFmEQ.fSEPJ2Jv2BgTMRf7ay3ZIQry-ZQ')
+client.run(bot_key)
