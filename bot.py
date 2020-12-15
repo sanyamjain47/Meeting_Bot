@@ -6,7 +6,11 @@ from discord_key import bot_key
 client = commands.Bot(command_prefix = '.')
 
 '''
+TO DO
 
+1.  Add support for firebase
+2. Add support for reminding everyone
+3. Add support for threading
 '''
 
 @client.event
