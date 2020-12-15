@@ -225,9 +225,10 @@ def check_valid_datetime(channel_id):
         datetime_obj = datetime.strptime(date + " " + time, "%d.%m.%Y %H:%M")
     
     current_time = datetime.utcnow()
-
-    time_difference = (current_time-datetime_obj).total_seconds()/60
-
+    #print(current_time)
+    #print(datetime_obj)
+    time_difference = (datetime_obj-current_time).total_seconds()/60
+    #print(time_difference)
     if time_difference < int(meeting_temp['reminder']) :
         return False
     else:

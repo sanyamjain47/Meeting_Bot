@@ -169,7 +169,7 @@ async def confirm(ctx):
             await ctx.send(data.temp_values_remaining(ctx.channel.id))
             await ctx.send("Meeting has been added to the database")
         else:
-            await ctx.send("The time is in past. Please update it.")
+            await ctx.send("The date time is in past. Please update it.")
 
 '''
 command - clear
