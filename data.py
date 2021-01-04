@@ -22,12 +22,24 @@ data_temp =
 ]
 '''
 import re
+import threading
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from datetime import datetime
-data_temp = list()
+from apscheduler.schedulers import asyncio
+import time as time_lib
 
+data_temp = list()
+data_queue = list()
+scheduled_meetings = asyncio.AsyncIOScheduler()
+
+
+def basic_setup():
+    scheduled_meetings.start()
+
+    #Get all the queued meetings from the server
+    # Queue the meetings
 '''
 Adds the temp_meeting to the firebase server
 '''
@@ -166,7 +178,8 @@ def add_meeting_temp(ctx, meeting_name):
             'offset': 0,
             'members_invited': None,
             'location': None,
-            'reminder':10
+            'reminder':10,
+            'unix_time':0
         }
     }
     data_temp.append(to_add)
@@ -212,9 +225,19 @@ def check_valid_date(date):
 Checks if the date and time are not in past
 '''
 def check_valid_datetime(channel_id):
+    system_offset = -time_lib.timezone
+
     meeting_temp = temp_values_remaining(channel_id)
     time = meeting_temp['time']
     date = meeting_temp['date']
+    offset = meeting_temp['offset']
+    
+    offset_seconds = datetime.strptime(offset[1:], "%H:%M")
+    offset_seconds = (offset_seconds - datetime(1900, 1, 1)).total_seconds()
+    
+    if(offset[0] == '-'):
+        offset_seconds = -1*offset_seconds
+    
     if "/" in date:
         datetime_obj = datetime.strptime(date + " " + time, "%d/%m/%Y %H:%M")
     
@@ -224,14 +247,17 @@ def check_valid_datetime(channel_id):
     else:
         datetime_obj = datetime.strptime(date + " " + time, "%d.%m.%Y %H:%M")
     
-    current_time = datetime.utcnow()
-    #print(current_time)
-    #print(datetime_obj)
-    time_difference = (datetime_obj-current_time).total_seconds()/60
-    #print(time_difference)
+    
+    datetime_seconds = datetime.timestamp(datetime_obj)
+    user_time = datetime_seconds-offset_seconds+system_offset
+    current_time = datetime.now().timestamp()
+    time_difference = user_time - current_time
+    time_difference = time_difference/60
+    
     if time_difference < int(meeting_temp['reminder']) :
         return False
     else:
+        update_time(user_time - int(meeting_temp['reminder']*60), channel_id)
         return True
 
 '''
@@ -269,11 +295,39 @@ def check_allvalues_temp(ctx):
     else:
         return 2
 
+def update_time(unix_time, channel_id):
+    for i in data_temp:
+        if i['channel_id'] == channel_id:
+            i['Meeting']['unix_time'] = unix_time
+            return
+
+
+def save_data(channel_id,client):
+    #Shift meeting of channel_id from data_temp to data_queue
+    
+    for i in data_temp:
+        if i['channel_id'] == channel_id:
+            i['progress'] = False
+            data_queue.append(i)
+            data_temp.remove(i)
+            ## Add this meeting to the queue server
+            schedule_reminder(i,client)
+            break
+            
+def schedule_reminder(values, client):
+    scheduled_meetings.add_job(send_reminder, args = [client,values],trigger = "date",\
+        run_date = datetime.fromtimestamp(values['Meeting']['unix_time']))
+
+
+'''
 async def checking_client(client, channel_id):
     print(type(client.get_channel(channel_id)))
     for i in data_temp:
         for member in i['Meeting']['members_invited']:
             #print(client.get_user(member))
             await client.get_user(member).send("CHeck")
-            
-#async def remind_meeting(data_dict):
+'''
+async def send_reminder(client, values):
+    for member in values['Meeting']['members_invited']:
+        await client.get_user(member).send("Formatted message here")
+    data_queue.remove(values)

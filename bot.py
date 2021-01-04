@@ -3,8 +3,9 @@ import discord
 from discord.ext import commands
 import data
 from discord_key import bot_key
-client = commands.Bot(command_prefix = '.')
 
+client = commands.Bot(command_prefix = '.')
+client.remove_command('help')
 '''
 TO DO
 
@@ -15,12 +16,9 @@ TO DO
 
 @client.event
 async def on_ready():
+    data.basic_setup()
     print("Bot is ready.")
     #print(type(client))
-
-@client.command()
-async def testing(ctx):
-    data.checking_client(client, ctx.channel.id)
 
 '''
 command - reminder
@@ -166,12 +164,19 @@ async def confirm(ctx):
         await ctx.send(data.temp_values_remaining(ctx.channel.id))
         return
     else:
-        #data.add_data_server(ctx.channel.id)
         #Check for correct date time.
-        isValidDateTime = data.check_valid_datetime(ctx.channel.id)
+        isValidDateTime = data.check_valid_datetime(ctx.channel.id)    
+        #except:
+        #    await ctx.send("Date or Time is in wrong format. Please Check")
+        #    return
+        
         if isValidDateTime is True:
+            
+            #Call the final save funtion
             await ctx.send(data.temp_values_remaining(ctx.channel.id))
+            data.save_data(ctx.channel.id, client)
             await ctx.send("Meeting has been added to the database")
+        
         else:
             await ctx.send("The date time is in past. Please update it.")
 
@@ -212,22 +217,27 @@ async def remind(ctx):
         await ctx.send("All values have been entered, use confirm to add the meeting")
 
 '''
-command - helper
+command - help
 Used to display all the commands that are needed to add a meeting
 '''
 @client.command()
-async def helper(ctx):
+async def help(ctx):
     await ctx.send("To add a meeting follow these steps -")
     await ctx.send("1. Use .meeting [Meeting Name] command to start adding a meeting")
     await ctx.send("2. Use .time [Time] command to add a time to the meeting")
+    await ctx.send("   Valid format - HH:MM")
     await ctx.send("3. Use .date [Date] command to add a date to the meeting")
+    await ctx.send("   Valid format - DD/MM/YYYY or DD.MM.YYYY or DD-MM-YYYY ")
     await ctx.send("4. Use .location [Location] command to add a location to the meeting")
-    await ctx.send("5. (Optional) Use .offset to change the timezone from UTC +0:00 to your own local timezone")
-    await ctx.send("6. (Optional) Use .reminder to change the reminder time from 10 mins")
-    await ctx.send("7. Use .remind [@Member(s) / @everyone] to add members to the meeting")
+    await ctx.send("5. Use .remind [[@]Member(s) / [@]everyone] to add members to the meeting")
+    await ctx.send("6. (Optional) Use .offset to change the timezone from UTC +0:00 to your own local timezone")
+    await ctx.send("   Valid format - HH:MM")
+    await ctx.send("7. (Optional) Use .reminder to change the reminder time from 10 mins")
     await ctx.send("8. Use .confirm to add the meeting")
 
 @client.command()
 async def start(ctx):
-    await data.checking_client(client,ctx.channel.id)
+    #await data.checking_client(client,ctx.channel.id)
+    pass
+
 client.run(bot_key)
