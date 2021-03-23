@@ -1,26 +1,3 @@
-''' keys = {'guild_id':index, ...}
-Size of ctx - 64
-data_temp = 
-[
-    {
-        guild_id: int,
-        guild_name: string
-        channel_id: int
-        channel_name: string
-        progress: boolean
-        Meeting : {
-            meeting_name:
-            time:
-            date:
-            offset:
-            members_invited:
-            location:
-            reminder:
-        }
-    },
-    
-]
-'''
 import re
 import threading
 import firebase_admin
@@ -310,7 +287,7 @@ def save_data(channel_id,client):
             i['progress'] = False
             data_queue.append(i)
             data_temp.remove(i)
-            ## Add this meeting to the queue server
+            ## Add this meeting toz the queue server
             schedule_reminder(i,client)
             break
             

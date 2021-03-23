@@ -12,7 +12,7 @@ client.remove_command('help')
 '''
 TO DO
 
-1.  Add support for firebase
+1.  Add support for mongodb
 '''
 
 # When the bot is ready
