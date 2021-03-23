@@ -64,7 +64,8 @@ async def offset(ctx, *offset_val):
     else:
         # Adds the timezone offset to the meeting information
         data.add_offset_temp(ctx, " ".join(offset_val))
-
+    
+    await ctx.send("Offset has been added")
     check = data.check_allvalues_temp(ctx)
     if check == 2:
         await ctx.send("All values have been entered, use confirm to add the meeting")
